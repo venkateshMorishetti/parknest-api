@@ -36,4 +36,10 @@ public interface ListingRepository extends JpaRepository<Listing, String>, Listi
             GROUP BY listing_id
             """)
     List<Object[]> bookingsSince(@Param("hostId") String hostId, @Param("from") OffsetDateTime from);
+
+    long countByHostIdAndDeletedAtIsNull(String hostId);
+
+    long countByStatusAndDeletedAtIsNull(String status);
+
+    List<Listing> findByStatusAndDeletedAtIsNullOrderBySubmittedAtAsc(String status);
 }

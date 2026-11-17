@@ -102,4 +102,4 @@ These follow the contracts in the frontend's `public/mock-data` (`endpoints.json
 | | `GET /host/dashboard`, `POST /host/booking-requests/{id}/decision`, `GET /host/bookings`, `GET /host/earnings` | Done |
 | Payments | `POST /payments/verify`, refunds, daily payout batches (mock gateway) | Done |
 | | Real gateway, webhooks, sending payouts | Waiting on a provider |
-| Admin | overview, spots review, users, bookings, refunds, payouts, activity | Planned |
+| Admin | overview, spots review, users (block/unblock), bookings (cancel with full refund), refunds and payouts (retry), activity log | Done |

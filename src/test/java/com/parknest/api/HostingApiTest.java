@@ -29,7 +29,7 @@ class HostingApiTest extends IntegrationTest {
         assertThat(on.data().get("payoutAccount").get("display").asText()).isEqualTo("HDFC ••••7890");
         assertThat(on.data().get("payoutAccount").get("status").asText()).isEqualTo("VERIFYING");
         // The account number is stored encrypted, never in clear.
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM payout_accounts WHERE convert_from(account_number_encrypted, 'LATIN1') LIKE '%50100234567890%'", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM payout_accounts WHERE position(convert_to('50100234567890', 'UTF8') in account_number_encrypted) > 0", Integer.class)).isZero();
         assertThat(get_("/users/me", token).data().get("hostProfile").get("status").asText()).isEqualTo("ACTIVE");
         assertThat(post_("/host/onboarding", token, Map.of("payout", Map.of("method", "UPI", "upiId", "a@ybl"), "acceptedHostTerms", true)).errorCode())
                 .isEqualTo("ALREADY_HOSTING");

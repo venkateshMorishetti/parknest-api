@@ -49,10 +49,10 @@ public class SecurityConfig {
                 .oauth2ResourceServer(o -> o
                         .jwt(j -> j.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint((req, res, ex) -> errors.write(res, 401, "Unauthorized", "UNAUTHORIZED", "Log in to continue"))
-                        .accessDeniedHandler((req, res, ex) -> errors.write(res, 403, "Not allowed", "FORBIDDEN", "You do not have access to this")))
+                        .accessDeniedHandler((req, res, ex) -> errors.write(res, 403, "Admins only", "FORBIDDEN", "You do not have access to the admin panel")))
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((req, res, ex) -> errors.write(res, 401, "Unauthorized", "UNAUTHORIZED", "Log in to continue"))
-                        .accessDeniedHandler((req, res, ex) -> errors.write(res, 403, "Not allowed", "FORBIDDEN", "You do not have access to this")))
+                        .accessDeniedHandler((req, res, ex) -> errors.write(res, 403, "Admins only", "FORBIDDEN", "You do not have access to the admin panel")))
                 .addFilterAfter(new AccountStatusFilter(users, errors), BearerTokenAuthenticationFilter.class);
         return http.build();
     }

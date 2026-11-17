@@ -1,5 +1,6 @@
 package com.parknest.api.bookings;
 
+import org.springframework.data.domain.Pageable;
 import jakarta.persistence.LockModeType;
 import java.time.OffsetDateTime;
 import java.util.Collection;
@@ -62,4 +63,21 @@ public interface BookingRepository extends JpaRepository<Booking, String> {
               and not exists (select 1 from PayoutItem i where i.bookingId = b.id)
             """)
     List<Booking> completedNotPaidOutForHost(@Param("hostId") String hostId);
+
+    long countByDriverId(String driverId);
+
+    long countByStatus(String status);
+
+    long countByConfirmedAtGreaterThanEqual(OffsetDateTime from);
+
+    /** Admin search: q matches the booking ref, the driver (name or phone), the host's name or the spot's title. "" means any. */
+    @Query("""
+            select b from Booking b, User d, User h, com.parknest.api.listings.Listing l
+            where d.id = b.driverId and h.id = b.hostId and l.id = b.listingId
+              and (:status = '' or b.status = :status)
+              and (:q = '' or lower(b.bookingRef) like concat('%', :q, '%') or lower(d.name) like concat('%', :q, '%')
+                   or d.phone like concat('%', :q, '%') or lower(h.name) like concat('%', :q, '%') or lower(l.title) like concat('%', :q, '%'))
+            order by b.createdAt desc
+            """)
+    List<Booking> adminSearch(@Param("q") String q, @Param("status") String status, Pageable page);
 }
