@@ -10,6 +10,11 @@ import org.springframework.data.repository.query.Param;
 
 public interface ListingRepository extends JpaRepository<Listing, String>, ListingSearch {
 
+    /** Locks the spot so two bookings for its last bay cannot both succeed. */
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select l from Listing l where l.id = :id")
+    Optional<Listing> findForUpdate(@Param("id") String id);
+
     @Query("select l from Listing l join fetch l.host where l.id = :id and l.deletedAt is null")
     Optional<Listing> findWithHost(@Param("id") String id);
 

@@ -19,3 +19,7 @@ parknest:
     encryption-key: dGVzdC1rZXktMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY=
   storage:
     local-dir: ./target/test-uploads
+  payments:
+    provider: MOCK
+  jobs:
+    enabled: false

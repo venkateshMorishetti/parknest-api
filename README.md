@@ -48,6 +48,7 @@ Settings come from environment variables (see [`.env.example`](.env.example)):
 * `GOOGLE_CLIENT_ID`
 * `CORS_ALLOWED_ORIGINS`
 * `PORT`
+* `PAYOUT_ENCRYPTION_KEY` (base64 of 32 bytes), `PAYMENTS_PROVIDER` (`MOCK` or `NONE`)
 
 Each environment has its own database. Flyway creates and updates the tables on startup from
 `src/main/resources/db/migration`. `V1__initial_schema.sql` is the 17-table schema; its design notes are in the
@@ -58,8 +59,16 @@ frontend repo's `db/README.md`. New changes go in new `V2__...sql` files; applie
 * **Code layout:**
   * `com.parknest.api.common`: envelope, errors, IDs (`usr_` + ULID) and request ids.
   * `config`: security, CORS and settings.
-  * One package per area: `auth` and `users` so far.
-* **Database access:** plain SQL with Spring `JdbcClient`, written against the schema. There is no ORM.
+  * One package per area (`auth`, `users`, `hosting`, `listings`, `bookings`, `payments`...), each with
+    controller → service → repository.
+* **Database access:** Spring Data JPA entities and repositories. Services hold no SQL; the few complex queries
+  (search, bay occupancy) live in repositories (`@Query` or a custom repository implementation).
+* **Bookings:** a spot is locked while a booking is made, and `listing_peak_occupancy` must be below its bays.
+  Instant spots hold a bay for 10 minutes while the driver pays. Host-approval spots create a request; approving
+  it gives the driver 12 hours to pay and declines other requests that no longer fit.
+* **Payments:** `PaymentGateway` has a `MOCK` provider (local and testing) and `NONE`. A real provider (Razorpay,
+  Cashfree...) is a new implementation of that interface. Payouts are grouped daily at 10:00 IST and stay
+  `SCHEDULED` until a payouts provider is added.
 * **Sign-in:**
   * Phone OTP or Google. A user is created on first sign-in.
   * OTP codes are stored as an HMAC. The limits are a 30-second wait before resending, 5 codes per 15 minutes per
@@ -84,12 +93,13 @@ These follow the contracts in the frontend's `public/mock-data` (`endpoints.json
 | Profile | `GET /users/me`, `PUT /users/me` | Done |
 | | `POST /users/me/phone/otp`, `POST /users/me/phone/verify` | Done |
 | | `POST /users/me/vehicles`, `PATCH` and `DELETE /users/me/vehicles/{id}` | Done |
-| Search and spots | `POST /listings/search`, `GET /listings/{id}`, `POST /listings/{id}/quote`, `GET /meta/search-options` | Next |
-| | `GET /locations/suggest`, `GET /locations/reverse`, `GET /content/home`, `GET /content/host` | Next |
-| Hosting | `GET` and `POST /host/onboarding`, `PUT /host/payout-account`, `GET /host/settings`, `PUT /host/settings/notifications` | Next |
-| | `POST /uploads`, `POST`, `GET` and `PUT /host/listings`, `PATCH /host/listings/{id}/status` | Next |
-| Bookings | `POST /bookings`, `GET /bookings`, `GET` and `PATCH /bookings/{id}`, check-in, check-out | Planned |
-| | `GET /bookings/{id}/cancellation`, `POST /bookings/{id}/cancel` | Planned |
-| | `GET /host/dashboard`, `POST /host/booking-requests/{id}/decision`, `GET /host/bookings`, `GET /host/earnings` | Planned |
-| Payments | `POST /payments/verify`, payment gateway webhooks, refunds, payouts | Planned (gateway not chosen) |
+| Search and spots | `POST /listings/search`, `GET /listings/{id}`, `POST /listings/{id}/quote`, `GET /meta/search-options` | Done |
+| | `GET /locations/suggest`, `GET /locations/reverse`, `GET /content/home`, `GET /content/host` | Done |
+| Hosting | `GET` and `POST /host/onboarding`, `PUT /host/payout-account`, `GET /host/settings`, `PUT /host/settings/notifications` | Done |
+| | `POST /uploads`, `POST`, `GET` and `PUT /host/listings`, `PATCH /host/listings/{id}/status` | Done |
+| Bookings | `POST /bookings`, `GET /bookings`, `GET` and `PATCH /bookings/{id}`, check-in, check-out | Done |
+| | `GET /bookings/{id}/cancellation`, `POST /bookings/{id}/cancel` | Done |
+| | `GET /host/dashboard`, `POST /host/booking-requests/{id}/decision`, `GET /host/bookings`, `GET /host/earnings` | Done |
+| Payments | `POST /payments/verify`, refunds, daily payout batches (mock gateway) | Done |
+| | Real gateway, webhooks, sending payouts | Waiting on a provider |
 | Admin | overview, spots review, users, bookings, refunds, payouts, activity | Planned |

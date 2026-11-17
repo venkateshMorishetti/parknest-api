@@ -1,5 +1,7 @@
 # Production (api.parknest.in). Never set OTP_FIXED_CODE here.
 parknest:
+  payments:
+    provider: ${PAYMENTS_PROVIDER:NONE}
   otp:
     fixed-code: ""
   google:

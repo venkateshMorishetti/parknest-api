@@ -70,3 +70,10 @@ parknest:
   payouts:
     # AES-256 key (base64 of 32 random bytes: openssl rand -base64 32) for bank account numbers.
     encryption-key: ${PAYOUT_ENCRYPTION_KEY}
+  payments:
+    # MOCK (local and testing) or NONE until a real provider (Razorpay, Cashfree...) is added.
+    provider: ${PAYMENTS_PROVIDER:NONE}
+  bookings:
+    hold-minutes: 10
+    # After the host approves a request, the driver has this long to pay (never past the start).
+    approval-pay-hours: 12

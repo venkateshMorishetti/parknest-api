@@ -1,5 +1,7 @@
 # Testing environment (api.testing.parknest.in). Secrets come from environment variables.
 parknest:
+  payments:
+    provider: ${PAYMENTS_PROVIDER:MOCK}
   otp:
     # Leave OTP_FIXED_CODE empty once an SMS provider is connected.
     fixed-code: ${OTP_FIXED_CODE:}
