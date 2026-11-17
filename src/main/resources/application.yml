@@ -1,0 +1,58 @@
+# Shared settings. Per-environment values come from environment variables (see .env.example).
+spring:
+  application:
+    name: parknest-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/parknest_local}
+    username: ${DATABASE_USERNAME:parknest}
+    password: ${DATABASE_PASSWORD:parknest}
+  flyway:
+    enabled: true
+  jackson:
+    default-property-inclusion: always
+  mvc:
+    problemdetails:
+      enabled: false
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+  error:
+    whitelabel:
+      enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+parknest:
+  jwt:
+    secret: ${JWT_SECRET}
+    issuer: parknest
+    access-ttl: 1h
+    refresh-ttl: 30d
+  otp:
+    pepper: ${OTP_PEPPER}
+    ttl: 5m
+    resend-after: 30s
+    max-attempts: 5
+    max-per-window: 5
+    window: 15m
+    fixed-code: ${OTP_FIXED_CODE:}
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}
+    allow-mock-tokens: false
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+  hosting:
+    terms-version: "2026-11"

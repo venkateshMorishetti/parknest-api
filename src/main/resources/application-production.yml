@@ -1,0 +1,13 @@
+# Production (api.parknest.in). Never set OTP_FIXED_CODE here.
+parknest:
+  otp:
+    fixed-code: ""
+  google:
+    allow-mock-tokens: false
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://parknest.in,https://www.parknest.in}
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

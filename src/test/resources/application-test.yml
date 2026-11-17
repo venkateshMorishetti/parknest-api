@@ -1,0 +1,17 @@
+# Integration tests run against a real PostgreSQL (docker compose up -d, or the CI service).
+spring:
+  datasource:
+    url: ${TEST_DATABASE_URL:jdbc:postgresql://localhost:5432/parknest_test}
+    username: ${TEST_DATABASE_USERNAME:parknest}
+    password: ${TEST_DATABASE_PASSWORD:parknest}
+  flyway:
+    clean-disabled: false
+parknest:
+  jwt:
+    secret: test-secret-0123456789abcdef0123456789abcdef
+  otp:
+    pepper: test-pepper
+    fixed-code: "123456"
+    resend-after: 0s
+  google:
+    allow-mock-tokens: true

@@ -1,0 +1,11 @@
+# Local development (SPRING_PROFILES_ACTIVE=local): fixed OTP 123456, mock Google button works, dev secrets.
+parknest:
+  jwt:
+    secret: ${JWT_SECRET:local-dev-secret-change-me-0123456789abcdef}
+  otp:
+    pepper: ${OTP_PEPPER:local-dev-pepper}
+    fixed-code: ${OTP_FIXED_CODE:123456}
+  google:
+    allow-mock-tokens: true
+  cors:
+    allowed-origins: http://localhost:4200,http://127.0.0.1:4200
