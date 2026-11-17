@@ -37,16 +37,16 @@ public class AccountStatusFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
-        Optional<UserRepository.AccountState> state = users.accountState(token.getName());
-        if (state.isEmpty()) {
+        Optional<User> user = users.findById(token.getName());
+        if (user.isEmpty()) {
             errors.write(response, 401, "Unauthorized", "UNAUTHORIZED", "Log in to continue");
             return;
         }
-        if ("BLOCKED".equals(state.get().status())) {
+        if (user.get().isBlocked()) {
             errors.write(response, 403, "Account blocked", "ACCOUNT_BLOCKED", "Your account is blocked. Contact support.");
             return;
         }
-        if (!state.get().phoneVerified() && !allowedWithoutPhone(request)) {
+        if (!user.get().isPhoneVerified() && !allowedWithoutPhone(request)) {
             errors.write(response, 403, "Mobile number needed", "PHONE_NOT_VERIFIED", "Add and verify your mobile number first");
             return;
         }

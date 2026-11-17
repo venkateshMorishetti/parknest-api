@@ -9,3 +9,5 @@ parknest:
     allow-mock-tokens: true
   cors:
     allowed-origins: http://localhost:4200,http://127.0.0.1:4200
+  payouts:
+    encryption-key: ${PAYOUT_ENCRYPTION_KEY:bG9jYWwtZGV2LWtleS0wMTIzNDU2Nzg5YWJjZGVmMDE=}

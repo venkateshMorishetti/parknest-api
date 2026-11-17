@@ -1,0 +1,40 @@
+{
+  "hero": {
+    "title": "Earn from your unused parking spot",
+    "subtitle": "List a driveway, garage or basement bay near you. You set the price and the hours.",
+    "earnings": {
+      "amount": {
+        "currency": "INR",
+        "amount": 4500
+      },
+      "period": "MONTH",
+      "example": "A spot at ₹150 a day, booked every day"
+    },
+    "benefits": [
+      "Choose instant booking, or approve each request yourself",
+      "Paid to your bank or UPI after each check-out",
+      "Every driver is verified with their phone number"
+    ]
+  },
+  "verification": {
+    "title": "Start hosting in 2 minutes",
+    "note": "No documents needed. We check each spot before drivers can book it, usually within a few hours.",
+    "steps": [
+      {
+        "code": "MOBILE",
+        "label": "Mobile number",
+        "description": "Verified with an OTP"
+      },
+      {
+        "code": "PAYOUT_ACCOUNT",
+        "label": "Payout account",
+        "description": "UPI or bank account for your earnings"
+      },
+      {
+        "code": "SPOT_REVIEW",
+        "label": "Add your spot",
+        "description": "Photos and map pin. We check it before it goes live"
+      }
+    ]
+  }
+}

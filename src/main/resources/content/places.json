@@ -1,0 +1,242 @@
+[
+  {
+    "placeId": "plc_001",
+    "label": "HSR Layout, Bengaluru",
+    "area": "HSR Layout",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9116,
+      "lng": 77.6389
+    }
+  },
+  {
+    "placeId": "plc_002",
+    "label": "Koramangala, Bengaluru",
+    "area": "Koramangala",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9352,
+      "lng": 77.6245
+    }
+  },
+  {
+    "placeId": "plc_003",
+    "label": "Bellandur, Bengaluru",
+    "area": "Bellandur",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9304,
+      "lng": 77.6784
+    }
+  },
+  {
+    "placeId": "plc_004",
+    "label": "Indiranagar, Bengaluru",
+    "area": "Indiranagar",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9719,
+      "lng": 77.6412
+    }
+  },
+  {
+    "placeId": "plc_005",
+    "label": "Whitefield, Bengaluru",
+    "area": "Whitefield",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9698,
+      "lng": 77.75
+    }
+  },
+  {
+    "placeId": "plc_101",
+    "label": "Electronic City, Bengaluru",
+    "area": "Electronic City",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.8452,
+      "lng": 77.6602
+    }
+  },
+  {
+    "placeId": "plc_102",
+    "label": "Jayanagar, Bengaluru",
+    "area": "Jayanagar",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.925,
+      "lng": 77.5938
+    }
+  },
+  {
+    "placeId": "plc_103",
+    "label": "JP Nagar, Bengaluru",
+    "area": "JP Nagar",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9063,
+      "lng": 77.5857
+    }
+  },
+  {
+    "placeId": "plc_104",
+    "label": "BTM Layout, Bengaluru",
+    "area": "BTM Layout",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9166,
+      "lng": 77.6101
+    }
+  },
+  {
+    "placeId": "plc_105",
+    "label": "Marathahalli, Bengaluru",
+    "area": "Marathahalli",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9569,
+      "lng": 77.7011
+    }
+  },
+  {
+    "placeId": "plc_106",
+    "label": "Sarjapur Road, Bengaluru",
+    "area": "Sarjapur Road",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9105,
+      "lng": 77.6855
+    }
+  },
+  {
+    "placeId": "plc_107",
+    "label": "MG Road, Bengaluru",
+    "area": "MG Road",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9756,
+      "lng": 77.6066
+    }
+  },
+  {
+    "placeId": "plc_108",
+    "label": "Malleshwaram, Bengaluru",
+    "area": "Malleshwaram",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 13.0031,
+      "lng": 77.5643
+    }
+  },
+  {
+    "placeId": "plc_109",
+    "label": "Hebbal, Bengaluru",
+    "area": "Hebbal",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 13.0358,
+      "lng": 77.597
+    }
+  },
+  {
+    "placeId": "plc_110",
+    "label": "Yelahanka, Bengaluru",
+    "area": "Yelahanka",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 13.1007,
+      "lng": 77.5963
+    }
+  },
+  {
+    "placeId": "plc_111",
+    "label": "Banashankari, Bengaluru",
+    "area": "Banashankari",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9255,
+      "lng": 77.5468
+    }
+  },
+  {
+    "placeId": "plc_112",
+    "label": "Rajajinagar, Bengaluru",
+    "area": "Rajajinagar",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9915,
+      "lng": 77.5554
+    }
+  },
+  {
+    "placeId": "plc_113",
+    "label": "Bannerghatta Road, Bengaluru",
+    "area": "Bannerghatta Road",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.889,
+      "lng": 77.597
+    }
+  },
+  {
+    "placeId": "plc_114",
+    "label": "Domlur, Bengaluru",
+    "area": "Domlur",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9609,
+      "lng": 77.6387
+    }
+  },
+  {
+    "placeId": "plc_115",
+    "label": "Ulsoor, Bengaluru",
+    "area": "Ulsoor",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9817,
+      "lng": 77.623
+    }
+  },
+  {
+    "placeId": "plc_116",
+    "label": "Kalyan Nagar, Bengaluru",
+    "area": "Kalyan Nagar",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 13.028,
+      "lng": 77.64
+    }
+  },
+  {
+    "placeId": "plc_117",
+    "label": "HBR Layout, Bengaluru",
+    "area": "HBR Layout",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 13.0358,
+      "lng": 77.6323
+    }
+  },
+  {
+    "placeId": "plc_118",
+    "label": "Basavanagudi, Bengaluru",
+    "area": "Basavanagudi",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9417,
+      "lng": 77.5755
+    }
+  },
+  {
+    "placeId": "plc_119",
+    "label": "Majestic, Bengaluru",
+    "area": "Majestic",
+    "city": "Bengaluru",
+    "geo": {
+      "lat": 12.9767,
+      "lng": 77.5713
+    }
+  }
+]

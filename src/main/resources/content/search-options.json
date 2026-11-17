@@ -1,0 +1,48 @@
+{
+  "vehicleTypes": [
+    {
+      "code": "BIKE",
+      "label": "Bike",
+      "category": "TWO_WHEELER"
+    },
+    {
+      "code": "HATCHBACK",
+      "label": "Car · Hatchback",
+      "category": "CAR"
+    },
+    {
+      "code": "SEDAN",
+      "label": "Car · Sedan",
+      "category": "CAR"
+    },
+    {
+      "code": "SUV",
+      "label": "Car · SUV",
+      "category": "CAR"
+    }
+  ],
+  "spotTypes": [
+    {
+      "code": "ANY",
+      "label": "Any"
+    },
+    {
+      "code": "COVERED",
+      "label": "Covered"
+    },
+    {
+      "code": "OPEN",
+      "label": "Open"
+    },
+    {
+      "code": "BASEMENT",
+      "label": "Basement"
+    }
+  ],
+  "defaults": {
+    "vehicleType": "HATCHBACK",
+    "spotType": "ANY",
+    "city": "Bengaluru",
+    "defaultDurationDays": 3
+  }
+}

@@ -1,13 +1,16 @@
 package com.parknest.api.users;
 
+import com.parknest.api.auth.AuthIdentity;
+import com.parknest.api.auth.AuthIdentityRepository;
 import com.parknest.api.common.ApiException;
 import com.parknest.api.common.Ids;
+import com.parknest.api.hosting.HostProfile;
+import com.parknest.api.hosting.HostProfileRepository;
 import com.parknest.api.users.UserDtos.AppUser;
 import com.parknest.api.users.UserDtos.SavedVehicle;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,38 +26,47 @@ public class UserService {
 
     private final UserRepository users;
     private final VehicleRepository vehicles;
-    private final JdbcClient db;
+    private final AuthIdentityRepository identities;
+    private final HostProfileRepository hostProfiles;
 
-    public UserService(UserRepository users, VehicleRepository vehicles, JdbcClient db) {
+    public UserService(UserRepository users, VehicleRepository vehicles, AuthIdentityRepository identities, HostProfileRepository hostProfiles) {
         this.users = users;
         this.vehicles = vehicles;
-        this.db = db;
+        this.identities = identities;
+        this.hostProfiles = hostProfiles;
     }
 
+    @Transactional(readOnly = true)
     public AppUser me(String userId) {
-        return toAppUser(users.findById(userId).orElseThrow(() -> ApiException.notFound("User")));
+        return toAppUser(find(userId));
+    }
+
+    public User find(String userId) {
+        return users.findById(userId).orElseThrow(() -> ApiException.notFound("User"));
     }
 
     public AppUser toAppUser(User u) {
-        List<String> providers = db.sql("SELECT provider FROM auth_identities WHERE user_id = :id ORDER BY provider DESC")
-                .param("id", u.id()).query(String.class).list();
-        return new AppUser(u.id(), u.name(), u.email(), u.phone(), u.avatarUrl(), providers, u.phoneVerified(), u.emailVerifiedAt() != null,
-                new UserDtos.HostProfile(u.hostStatus()), vehicles.listForUser(u.id()).stream().map(UserService::toDto).toList(), u.roles());
+        List<String> providers = identities.findByUserIdOrderByProviderDesc(u.getId()).stream().map(AuthIdentity::getProvider).toList();
+        String hostStatus = hostProfiles.findById(u.getId()).map(HostProfile::getStatus).orElse("NOT_STARTED");
+        return new AppUser(u.getId(), u.getName(), u.getEmail(), u.getPhone(), u.getAvatarUrl(), providers, u.isPhoneVerified(), u.isEmailVerified(),
+                new UserDtos.HostProfile(hostStatus), activeVehicles(u.getId()).stream().map(UserService::toDto).toList(), List.copyOf(u.getRoles()));
     }
 
     /** PUT /users/me: a changed email needs verifying again. */
     @Transactional
     public AppUser updateProfile(String userId, UserDtos.UpdateProfileRequest req) {
-        User current = users.findById(userId).orElseThrow(() -> ApiException.notFound("User"));
+        User user = find(userId);
         String email = req.email() == null || req.email().isBlank() ? null : req.email().trim();
         if (email != null) {
-            users.findByEmail(email).filter(u -> !u.id().equals(userId)).ifPresent(u -> {
+            users.findByEmailIgnoreCase(email).filter(u -> !u.getId().equals(userId)).ifPresent(u -> {
                 throw ApiException.conflict("EMAIL_IN_USE", "email", "This email is used by another ParkNest account");
             });
         }
-        boolean sameEmail = email != null && email.equalsIgnoreCase(current.email());
-        users.updateProfile(userId, req.name().trim(), email, sameEmail);
-        return me(userId);
+        boolean sameEmail = email != null && email.equalsIgnoreCase(user.getEmail());
+        user.setName(req.name().trim());
+        user.setEmail(email);
+        if (!sameEmail) user.setEmailVerifiedAt(null);
+        return toAppUser(users.saveAndFlush(user));
     }
 
     @Transactional
@@ -63,8 +75,8 @@ public class UserService {
         if (!REGISTRATION.matcher(reg).matches()) {
             throw ApiException.invalid("INVALID_REGISTRATION", "registrationNumber", "Enter a valid vehicle number, e.g. KA 01 AB 1234");
         }
-        List<VehicleRepository.Vehicle> saved = vehicles.listForUser(userId);
-        if (saved.stream().anyMatch(v -> v.registrationNumber().equals(reg))) {
+        List<Vehicle> saved = activeVehicles(userId);
+        if (saved.stream().anyMatch(v -> v.getRegistrationNumber().equals(reg))) {
             throw ApiException.conflict("DUPLICATE_VEHICLE", "registrationNumber", "This vehicle number is already in your list");
         }
         if (saved.size() >= MAX_VEHICLES) {
@@ -72,34 +84,47 @@ public class UserService {
         }
         boolean makeDefault = Boolean.TRUE.equals(req.isDefault()) || saved.isEmpty();
         if (makeDefault) vehicles.clearDefault(userId);
-        String id = Ids.newId("veh");
-        vehicles.insert(id, userId, reg, req.type(), blankToNull(req.nickname()), makeDefault);
-        return toDto(vehicles.find(userId, id).orElseThrow());
+        Vehicle v = new Vehicle();
+        v.setId(Ids.newId("veh"));
+        v.setUserId(userId);
+        v.setRegistrationNumber(reg);
+        v.setType(req.type());
+        v.setNickname(blankToNull(req.nickname()));
+        v.setDefault(makeDefault);
+        return toDto(vehicles.saveAndFlush(v));
     }
 
     @Transactional
     public SavedVehicle updateVehicle(String userId, String vehicleId, UserDtos.UpdateVehicleRequest req) {
-        vehicles.find(userId, vehicleId).orElseThrow(() -> ApiException.notFound("Vehicle"));
-        if (req.nickname() != null) vehicles.setNickname(userId, vehicleId, blankToNull(req.nickname()));
-        if (Boolean.TRUE.equals(req.isDefault())) {
-            vehicles.clearDefault(userId);
-            vehicles.setDefault(userId, vehicleId);
-        }
-        return toDto(vehicles.find(userId, vehicleId).orElseThrow());
+        findVehicle(userId, vehicleId);
+        if (Boolean.TRUE.equals(req.isDefault())) vehicles.clearDefault(userId);
+        Vehicle v = findVehicle(userId, vehicleId);  // reloaded after the bulk update
+        if (req.nickname() != null) v.setNickname(blankToNull(req.nickname()));
+        if (Boolean.TRUE.equals(req.isDefault())) v.setDefault(true);
+        return toDto(vehicles.saveAndFlush(v));
     }
 
     /** Removing the default vehicle makes the oldest remaining one the default. */
     @Transactional
     public void removeVehicle(String userId, String vehicleId) {
-        VehicleRepository.Vehicle target = vehicles.find(userId, vehicleId).orElseThrow(() -> ApiException.notFound("Vehicle"));
-        vehicles.softDelete(userId, vehicleId);
-        if (target.isDefault()) {
-            vehicles.listForUser(userId).stream().findFirst().ifPresent(v -> vehicles.setDefault(userId, v.id()));
-        }
+        Vehicle target = findVehicle(userId, vehicleId);
+        boolean wasDefault = target.isDefault();
+        target.setDeletedAt(java.time.OffsetDateTime.now());
+        target.setDefault(false);
+        vehicles.saveAndFlush(target);
+        if (wasDefault) activeVehicles(userId).stream().findFirst().ifPresent(v -> v.setDefault(true));
     }
 
-    static SavedVehicle toDto(VehicleRepository.Vehicle v) {
-        return new SavedVehicle(v.id(), v.registrationNumber(), v.type(), VEHICLE_LABELS.get(v.type()), v.nickname(), v.isDefault());
+    private List<Vehicle> activeVehicles(String userId) {
+        return vehicles.findByUserIdAndDeletedAtIsNullOrderByIsDefaultDescCreatedAtAsc(userId);
+    }
+
+    private Vehicle findVehicle(String userId, String vehicleId) {
+        return vehicles.findByIdAndUserIdAndDeletedAtIsNull(vehicleId, userId).orElseThrow(() -> ApiException.notFound("Vehicle"));
+    }
+
+    static SavedVehicle toDto(Vehicle v) {
+        return new SavedVehicle(v.getId(), v.getRegistrationNumber(), v.getType(), VEHICLE_LABELS.get(v.getType()), v.getNickname(), v.isDefault());
     }
 
     static String normalise(String registration) {

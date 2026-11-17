@@ -4,6 +4,7 @@ import com.parknest.api.common.ApiException;
 import com.parknest.api.common.Ids;
 import com.parknest.api.config.AppProperties;
 import com.parknest.api.users.User;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -12,7 +13,6 @@ import java.time.OffsetDateTime;
 import java.util.Base64;
 import java.util.HexFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -31,62 +31,57 @@ public class TokenService {
     public record Tokens(String accessToken, String refreshToken, long expiresInSeconds) {}
 
     private final JwtEncoder encoder;
-    private final JdbcClient db;
+    private final SessionRepository sessions;
     private final AppProperties.Jwt props;
     private final SecureRandom random = new SecureRandom();
 
-    public TokenService(JwtEncoder encoder, JdbcClient db, AppProperties props) {
+    public TokenService(JwtEncoder encoder, SessionRepository sessions, AppProperties props) {
         this.encoder = encoder;
-        this.db = db;
+        this.sessions = sessions;
         this.props = props.jwt();
     }
 
     @Transactional
-    public Tokens issue(User user, String userAgent, String ip) {
+    public Tokens issue(User user, String userAgent, InetAddress ip) {
         String refresh = randomToken();
-        db.sql("""
-                INSERT INTO sessions (id, user_id, refresh_token_hash, user_agent, ip_address, expires_at)
-                VALUES (:id, :user, :hash, :agent, CAST(:ip AS inet), :expires)
-                """)
-                .param("id", Ids.newId("ses")).param("user", user.id()).param("hash", sha256(refresh))
-                .param("agent", userAgent == null ? null : userAgent.substring(0, Math.min(userAgent.length(), 300)))
-                .param("ip", ip).param("expires", OffsetDateTime.now().plus(props.refreshTtl()))
-                .update();
+        Session session = new Session();
+        session.setId(Ids.newId("ses"));
+        session.setUserId(user.getId());
+        session.setRefreshTokenHash(sha256(refresh));
+        session.setUserAgent(userAgent == null ? null : userAgent.substring(0, Math.min(userAgent.length(), 300)));
+        session.setIpAddress(ip);
+        session.setExpiresAt(OffsetDateTime.now().plus(props.refreshTtl()));
+        sessions.save(session);
         return new Tokens(accessToken(user), refresh, props.accessTtl().toSeconds());
     }
 
-    /** Swaps a refresh token for new tokens; the old one stops working. Returns the user id. */
+    /** Uses up a refresh token (it stops working) and returns its user id. */
     @Transactional
     public String rotate(String refreshToken) {
-        String userId = db.sql("""
-                UPDATE sessions SET revoked_at = now()
-                WHERE refresh_token_hash = :hash AND revoked_at IS NULL AND expires_at > now()
-                RETURNING user_id
-                """)
-                .param("hash", sha256(refreshToken))
-                .query(String.class)
-                .optional()
+        Session session = sessions.findLiveForUpdate(sha256(refreshToken), OffsetDateTime.now())
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Unauthorized", "SESSION_EXPIRED", null, "Your session has ended. Log in again."));
-        return userId;
+        session.setRevokedAt(OffsetDateTime.now());
+        return session.getUserId();
     }
 
+    @Transactional
     public void revoke(String refreshToken) {
-        db.sql("UPDATE sessions SET revoked_at = now() WHERE refresh_token_hash = :hash AND revoked_at IS NULL")
-                .param("hash", sha256(refreshToken)).update();
+        sessions.findByRefreshTokenHashAndRevokedAtIsNull(sha256(refreshToken)).ifPresent(s -> s.setRevokedAt(OffsetDateTime.now()));
     }
 
+    @Transactional
     public void revokeAll(String userId) {
-        db.sql("UPDATE sessions SET revoked_at = now() WHERE user_id = :user AND revoked_at IS NULL").param("user", userId).update();
+        sessions.revokeAll(userId, OffsetDateTime.now());
     }
 
     private String accessToken(User user) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(props.issuer())
-                .subject(user.id())
+                .subject(user.getId())
                 .issuedAt(now)
                 .expiresAt(now.plus(props.accessTtl()))
-                .claim("roles", user.roles())
+                .claim("roles", user.getRoles())
                 .build();
         return encoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims)).getTokenValue();
     }

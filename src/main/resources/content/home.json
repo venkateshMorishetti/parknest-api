@@ -1,0 +1,38 @@
+{
+  "hero": {
+    "badge": "For apartments without parking",
+    "title": "Find safe parking while you are away from home",
+    "subtitle": "Book a driveway, garage or basement bay, checked by ParkNest, near your home for a day or a month. Own a spare spot? Host it and earn.",
+    "trustPoints": [
+      {
+        "icon": "shield",
+        "label": "Every spot checked"
+      },
+      {
+        "icon": "video",
+        "label": "CCTV and gated"
+      },
+      {
+        "icon": "zap",
+        "label": "Instant confirmation"
+      }
+    ]
+  },
+  "howItWorks": [
+    {
+      "step": 1,
+      "title": "Search and compare",
+      "description": "Enter location, vehicle and dates to see matching spots on the map."
+    },
+    {
+      "step": 2,
+      "title": "Book and pay securely",
+      "description": "Instant confirmation or host approval. We hold the spot while you pay."
+    },
+    {
+      "step": 3,
+      "title": "Check in, park, check out",
+      "description": "Get directions and entry instructions. The host is paid after check-out."
+    }
+  ]
+}
